@@ -32,3 +32,4 @@ $app->get('/', App\Action\HomePageAction::class, 'home');
 $app->get('/api/ping', App\Action\PingAction::class, 'api.ping');
 
 $app->get('/products', App\Action\ProductListAction::class, 'products');
+$app->post('/products/create', App\Action\ProductCreateAction::class, 'products.create');

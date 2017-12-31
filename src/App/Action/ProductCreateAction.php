@@ -11,12 +11,19 @@ use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response\HtmlResponse;
+use Zend\Diactoros\Response\RedirectResponse;
+use Zend\Expressive\Router\RouterInterface;
 use Zend\Expressive\Template\TemplateRendererInterface;
 use Zend\Hydrator\ClassMethods;
 
 
-class ProductListAction implements MiddlewareInterface
+class ProductCreateAction implements MiddlewareInterface
 {
+
+    /**
+     * @var RouterInterface
+     */
+    private $router;
 
     /**
      * @var TemplateRendererInterface
@@ -29,15 +36,21 @@ class ProductListAction implements MiddlewareInterface
     private $entityManager;
 
     /**
-     * ProductListAction constructor.
+     * ProductCreateAction constructor.
+     * @param RouterInterface           $router
      * @param TemplateRendererInterface $template
      * @param EntityManager             $entityManager
      */
-    public function __construct(TemplateRendererInterface $template, EntityManager $entityManager)
-    {
+    public function __construct(
+        RouterInterface $router,
+        TemplateRendererInterface $template,
+        EntityManager $entityManager
+    ) {
+        $this->router        = $router;
         $this->template      = $template;
         $this->entityManager = $entityManager;
     }
+
 
     /**
      * Process an incoming server request and return a response, optionally delegating
@@ -47,24 +60,25 @@ class ProductListAction implements MiddlewareInterface
      * @param DelegateInterface      $delegate
      *
      * @return ResponseInterface
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function process(ServerRequestInterface $request, DelegateInterface $delegate)
     {
-        /*
-        $product = new Product();
-        $product->name = 'Celular';
-        $product->price = 999.99;
-        $product->description = 'Um celular de qualquer marca';
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
-        */
-
         $form = new ProductCreateForm();
         $form->setHydrator(new ClassMethods());
         $form->bind(new Product);
 
-        $repository = $this->entityManager->getRepository(Product::class);
-        $products = $repository->findAll();
-        return new HtmlResponse($this->template->render('app::products/list', ['form' => $form, 'products' => $products]));
+        $data = $request->getParsedBody();
+        $form->setData($data);
+
+        if ($form->isValid()) {
+            $entity = $form->getData();
+            $this->entityManager->persist($entity);
+            $this->entityManager->flush();
+        }
+
+        $uri = $this->router->generateUri('products');
+        return new RedirectResponse($uri);
     }
 }
