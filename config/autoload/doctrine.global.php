@@ -5,13 +5,13 @@ return [
         'connection' => [
             'orm_default' => [
                 'params' => [
-                    'host' => 'localhost',
+                    'host' => '10.0.75.1',
                     'posrt' => '3306',
                     'user' => 'root',
                     'password' => 'sandbox',
                     'dbname' => 'zend_expressive_doctrine_base',
                     'driverOptions' => [
-                        \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"
+                        //\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"
                     ]
                 ]
             ]
