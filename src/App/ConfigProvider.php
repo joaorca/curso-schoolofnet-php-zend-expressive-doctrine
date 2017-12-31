@@ -38,6 +38,7 @@ class ConfigProvider
             ],
             'factories'  => [
                 Action\HomePageAction::class => Action\HomePageFactory::class,
+                Action\ProductListAction::class => Action\ProductListFactory::class,
             ],
         ];
     }
